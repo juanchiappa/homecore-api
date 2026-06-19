@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="HomeCore.API/HomeCore.API.csproj" />
+  <Project Path="HomeCore.BLL/HomeCore.BLL.csproj" />
+  <Project Path="HomeCore.DAL/HomeCore.DAL.csproj" />
+  <Project Path="HomeCore.Entities/HomeCore.Entities.csproj" />
+  <Project Path="HomeCore.Tests/HomeCore.Tests.csproj" />
+</Solution>
