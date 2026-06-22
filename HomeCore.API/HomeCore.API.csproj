@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\HomeCore.BLL\HomeCore.BLL.csproj" />
+    <ProjectReference Include="..\HomeCore.DAL\HomeCore.DAL.csproj" />
   </ItemGroup>
 
   <ItemGroup>
