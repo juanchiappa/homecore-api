@@ -11,7 +11,7 @@ namespace HomeCore.Entities.DTOs
         public string Username { get; set; } = string.Empty;
 
         [Required]
-        public string Passwword { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
 
     }
 }
