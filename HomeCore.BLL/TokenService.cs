@@ -9,12 +9,13 @@ using System.Text;
 
 namespace HomeCore.BLL
 {
-    public class TokenService
+    public class TokenService : ITokenService
     {
         private readonly IConfiguration _configuration;
-        public TokenService(IConfiguration Configuration)
+
+        public TokenService(IConfiguration configuration)
         {
-            _configuration = Configuration;
+            _configuration = configuration;
         }
 
         public (string Token, DateTime ExpiresAt) GenerateToken(User usuario)

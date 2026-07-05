@@ -7,6 +7,6 @@ namespace HomeCore.BLL
 {
     public interface ITokenService
     {
-        (string Token, DateTime ExpiresAt) GenerateToken(User user);
+        (string Token, DateTime ExpiresAt) GenerateToken(User usuario);
     }
 }

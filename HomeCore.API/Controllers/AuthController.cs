@@ -6,7 +6,7 @@ namespace HomeCore.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class AuthController
+    public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
 
