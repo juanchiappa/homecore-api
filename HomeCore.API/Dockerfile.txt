@@ -1,0 +1,29 @@
+﻿FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+
+COPY HomeCore.sln                               .
+COPY HomeCore.Entities/HomeCore.Entities.csproj HomeCore.Entities/
+COPY HomeCore.DAL/HomeCore.DAL.csproj           HomeCore.DAL/
+COPY HomeCore.BLL/HomeCore.BLL.csproj           HomeCore.BLL/
+COPY HomeCore.API/HomeCore.API.csproj           HomeCore.API/
+COPY HomeCore.Tests/HomeCore.Tests.csproj       HomeCore.Tests/
+
+RUN dotnet restore HomeCore.API/HomeCore.API.csproj
+
+COPY . .
+RUN dotnet publish HomeCore.API/HomeCore.API.csproj \
+    -c Release \
+    -o /app/publish \
+    --no-restore
+
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+WORKDIR /app
+
+RUN mkdir -p config
+
+COPY --from=build /app/publish .
+
+EXPOSE 8080
+ENV ASPNETCORE_URLS=http://+:8080
+
+ENTRYPOINT ["dotnet", "HomeCore.API.dll"]

@@ -1,0 +1,26 @@
+services:
+  homecore-api:
+    image: youruser/homecore-api:latest
+    build:
+      context: .
+      dockerfile: HomeCore.API/Dockerfile
+    container_name: homecore-api
+    restart: unless-stopped
+    ports:
+      - "5000:8080"
+    environment:
+      - Jwt__Key=${JWT_KEY}
+      - Admin__Password=${ADMIN_PASSWORD}
+    volumes:
+      - ./config/services.json:/app/config/services.json:ro
+      - homecore-data:/app/homecore.db
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - homecore-net
+
+volumes:
+  homecore-data:
+
+networks:
+  homecore-net:
+    driver: bridge

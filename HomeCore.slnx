@@ -1,4 +1,10 @@
 <Solution>
+  <Folder Name="/Elementos de la solución/">
+    <File Path=".dockerignore" />
+    <File Path=".env.example" />
+    <File Path="docker-compose.yml" />
+    <File Path="README.md" />
+  </Folder>
   <Project Path="HomeCore.API/HomeCore.API.csproj" />
   <Project Path="HomeCore.BLL/HomeCore.BLL.csproj" />
   <Project Path="HomeCore.DAL/HomeCore.DAL.csproj" />

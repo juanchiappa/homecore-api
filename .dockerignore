@@ -1,0 +1,15 @@
+**/bin/
+**/obj/
+**/.vs/
+**/*.user
+**/*.suo
+**/secrets.json
+.git/
+.gitignore
+**/*.db
+**/*.db-shm
+**/*.db-wal
+**/config/services.json
+**/TestResults/
+docker-compose.override.yml
+.env
