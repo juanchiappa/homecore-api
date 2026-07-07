@@ -84,6 +84,9 @@ builder.Services.AddSingleton<DockerClient>(_ =>
 
 builder.Services.AddScoped<IDockerService, DockerService>();
 
+//System Metrics Service
+builder.Services.AddScoped<ISystemMetricsService, SystemMetricsService>();
+
 //Plugin system
 builder.Services.AddHttpClient<HttpHealthCheckMonitor>();
 builder.Services.AddScoped<IServiceMonitor, HttpHealthCheckMonitor>();
