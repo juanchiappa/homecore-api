@@ -1,51 +1,72 @@
 # HomeCore API
 
-REST API en ASP.NET Core 8 para monitorear y gestionar cualquier homelab basado en Docker.
-No hay servicios hardcodeados — definís qué monitorear en un archivo JSON sin tocar código.
+A self-hosted REST API built with ASP.NET Core 8 for monitoring and managing any Docker-based homelab.
+No hardcoded services — define what to monitor in a JSON file without touching any code.
 
-## Inicio rápido
+## Features
 
-### 1. Clonar y configurar
+- **Plugin-based monitor system**: HTTP health-check and Docker container status included. Easily extensible with custom monitors.
+- **JWT Bearer authentication** to protect all endpoints.
+- **Swagger UI** available in development mode.
+- **100% external config**: `services.json` defines what to monitor in your homelab.
+- **Docker-ready**: single `docker compose up` and you're running.
 
-git clone https://github.com/tuusuario/homecore-api.git
+## Quick Start
+
+### 1. Clone and configure
+
+```bash
+git clone https://github.com/yourusername/homecore-api.git
 cd homecore-api
+```
 
-Crear el archivo de secretos:
+Create your secrets file:
 
+```bash
 cp .env.example .env
-# Editar .env con tu JWT_KEY y ADMIN_PASSWORD
+# Edit .env with your JWT_KEY and ADMIN_PASSWORD
+```
 
-Crear tu config de servicios:
+Create your services config:
 
+```bash
 mkdir -p config
 cp HomeCore.API/config/services.example.json config/services.json
-# Editar config/services.json con tus servicios
+# Edit config/services.json with your services
+```
 
-### 2. Levantar con Docker Compose
+### 2. Start with Docker Compose
 
+```bash
 docker compose up -d
+```
 
-La API queda disponible en http://localhost:5000.
+API available at `http://localhost:5000`.
 
-### 3. Autenticarse
+### 3. Authenticate
 
+```bash
 curl -X POST http://localhost:5000/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{ "userName": "admin", "password": "tu-password" }'
+  -d '{ "userName": "admin", "password": "your-password" }'
+```
 
-Respuesta:
+Response:
 
+```json
 {
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "expiresAt": "2025-01-15T11:00:00Z"
 }
+```
 
-Usá el token en el header Authorization: Bearer <token> para el resto de los endpoints.
+Use the token in the `Authorization: Bearer <token>` header for all other endpoints.
 
-## Configuración de servicios
+## Services Configuration
 
-Editá config/services.json:
+Edit `config/services.json` to define what to monitor:
 
+```json
 {
   "services": [
     {
@@ -54,53 +75,92 @@ Editá config/services.json:
       "url": "http://jellyfin:8096/health"
     },
     {
+      "name": "qBittorrent",
+      "type": "http_healthcheck",
+      "url": "http://qbittorrent:8080"
+    },
+    {
       "name": "Nextcloud",
       "type": "docker_container",
       "containerName": "nextcloud"
     }
   ]
 }
+```
 
-### Tipos de monitor disponibles
+### Available monitor types
 
-| Tipo               | Descripción                        | Campo requerido   |
-|--------------------|------------------------------------|-------------------|
-| http_healthcheck   | GET al URL, healthy si responde 2xx| url               |
-| docker_container   | Estado del contenedor vía Docker   | containerName     |
+| Type | Description | Required field |
+|---|---|---|
+| `http_healthcheck` | GET request to URL, healthy if 2xx | `url` |
+| `docker_container` | Container state via Docker Engine API | `containerName` |
 
 ## Endpoints
 
-| Método | Ruta                         | Descripción                              |
-|--------|------------------------------|------------------------------------------|
-| POST   | /api/auth/login              | Obtener JWT                              |
-| GET    | /api/services                | Estado de los servicios en services.json |
-| GET    | /api/containers              | Lista de contenedores Docker             |
-| GET    | /api/containers/{id}/stats   | CPU, RAM y red de un contenedor          |
-| GET    | /api/system/metrics          | CPU%, RAM% y disco% del host             |
-| GET    | /api/system/uptime           | Uptime del host                          |
+| Method | Route | Description |
+|---|---|---|
+| `POST` | `/api/auth/login` | Get JWT token |
+| `GET` | `/api/services` | Status of services defined in `services.json` |
+| `GET` | `/api/containers` | List Docker containers (`?all=true` includes stopped) |
+| `GET` | `/api/containers/{id}/stats` | CPU, RAM and network of a container |
+| `GET` | `/api/system/metrics` | Host CPU%, RAM% and disk usage |
+| `GET` | `/api/system/uptime` | Host uptime |
 
-## Variables de entorno
+## Environment Variables
 
-| Variable                | Default               | Descripción                        |
-|-------------------------|-----------------------|------------------------------------|
-| Jwt__Key                | (requerido)           | Clave secreta para firmar JWT      |
-| Jwt__ExpirationMinutes  | 60                    | Vida útil del token en minutos     |
-| Admin__UserName         | admin                 | Nombre del usuario admin           |
-| Admin__Password         | (requerido)           | Contraseña del admin               |
-| Docker__Uri             | unix:///var/run/docker.sock | URI del Docker Engine        |
-| ServicesConfigPath      | config/services.json  | Path al archivo de servicios       |
+| Variable | Default | Description |
+|---|---|---|
+| `Jwt__Key` | *(required)* | Secret key for signing JWT tokens |
+| `Jwt__ExpirationMinutes` | `60` | Token lifetime in minutes |
+| `Admin__UserName` | `admin` | Admin username |
+| `Admin__Password` | *(required)* | Admin password |
+| `Docker__Uri` | `unix:///var/run/docker.sock` | Docker Engine URI |
+| `ServicesConfigPath` | `config/services.json` | Path to services config file |
 
-## Tech stack
+## Homelab Examples
 
-| Componente       | Tecnología             |
-|------------------|------------------------|
-| Framework        | ASP.NET Core 8         |
-| Autenticación    | JWT Bearer (HS256)     |
-| Persistencia     | Dapper + SQLite        |
-| Docker           | Docker.DotNet          |
-| Documentación    | Swagger UI             |
-| Testing          | xUnit + Moq            |
+**Plex + Home Assistant + Portainer:**
+```json
+{
+  "services": [
+    { "name": "Plex",           "type": "http_healthcheck", "url": "http://plex:32400/identity" },
+    { "name": "Home Assistant", "type": "http_healthcheck", "url": "http://homeassistant:8123" },
+    { "name": "Portainer",      "type": "docker_container", "containerName": "portainer" }
+  ]
+}
+```
 
-## Licencia
+**Full *arr stack:**
+```json
+{
+  "services": [
+    { "name": "Sonarr",   "type": "http_healthcheck", "url": "http://sonarr:8989/ping" },
+    { "name": "Radarr",   "type": "http_healthcheck", "url": "http://radarr:7878/ping" },
+    { "name": "Prowlarr", "type": "http_healthcheck", "url": "http://prowlarr:9696/ping" },
+    { "name": "Bazarr",   "type": "docker_container", "containerName": "bazarr" }
+  ]
+}
+```
+
+## Tech Stack
+
+| Component | Technology |
+|---|---|
+| Framework | ASP.NET Core 8 |
+| Authentication | JWT Bearer (HS256) |
+| Persistence | Dapper + SQLite |
+| Docker integration | Docker.DotNet |
+| Documentation | Swashbuckle (Swagger UI) |
+| Testing | xUnit + Moq |
+| Deployment | Docker + Docker Hub |
+
+## Project Structure
+HomeCore.Entities/   → Shared entities and DTOs
+HomeCore.DAL/        → Repositories, Dapper, SQLite
+HomeCore.BLL/        → Services, business logic, monitor plugin system
+HomeCore.API/        → Controllers, ASP.NET Core configuration
+HomeCore.Tests/      → Unit tests (xUnit + Moq)
+
+## License
 
 MIT
