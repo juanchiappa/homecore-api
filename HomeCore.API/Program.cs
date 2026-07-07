@@ -1,3 +1,4 @@
+using Docker.DotNet;
 using HomeCore.BLL;
 using HomeCore.BLL.Monitors;
 using HomeCore.DAL;
@@ -75,9 +76,18 @@ builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
+//Docker 
+var dockerUri = builder.Configuration["Docker:Uri"] ?? "unix:///var/run/docker.sock";
+
+builder.Services.AddSingleton<DockerClient>(_ =>
+    new DockerClientConfiguration(new Uri(dockerUri)).CreateClient());
+
+builder.Services.AddScoped<IDockerService, DockerService>();
+
 //Plugin system
 builder.Services.AddHttpClient<HttpHealthCheckMonitor>();
 builder.Services.AddScoped<IServiceMonitor, HttpHealthCheckMonitor>();
+builder.Services.AddScoped<IServiceMonitor, DockerContainerMonitor>();
 builder.Services.AddScoped<ServiceMonitorFactory>();
 
 //Build and run the app
