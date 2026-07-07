@@ -80,9 +80,11 @@ namespace HomeCore.BLL
             if (systemDelta <= 0 || cpuDelta < 0)
                 return 0.0;
 
-            var numCpus = stats.CPUStats.OnlineCPUs;
+            var numCpus = stats.CPUStats.OnlineCPUs;  // uint en Docker.DotNet
+
             if (numCpus == 0 && stats.CPUStats.CPUUsage.PercpuUsage is not null)
-                numCpus = (ulong)stats.CPUStats.CPUUsage.PercpuUsage.Count;
+                numCpus = (uint)stats.CPUStats.CPUUsage.PercpuUsage.Count;  // ← uint, no ulong
+
             if (numCpus == 0)
                 numCpus = 1;
 
