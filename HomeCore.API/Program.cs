@@ -1,3 +1,4 @@
+using System.Text;
 using Docker.DotNet;
 using HomeCore.BLL;
 using HomeCore.BLL.Monitors;
@@ -6,11 +7,10 @@ using HomeCore.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//Swagger
+// ── Swagger ───────────────────────────────────────────────────────────────────
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -39,7 +39,7 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-//JWT Auth
+// ── JWT Auth ──────────────────────────────────────────────────────────────────
 var jwtKey = builder.Configuration["Jwt:Key"]
     ?? throw new InvalidOperationException("Jwt:Key debe configurarse en user-secrets.");
 
@@ -61,7 +61,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 
-//Persistence
+// ── Persistencia ──────────────────────────────────────────────────────────────
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? "Data Source=homecore.db";
 
@@ -71,12 +71,12 @@ builder.Services.AddSingleton<IDbConnectionFactory>(
 builder.Services.AddScoped<DbInitializer>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
-//Auth Service
+// ── Autenticación ─────────────────────────────────────────────────────────────
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
-//Docker 
+// ── Docker ────────────────────────────────────────────────────────────────────
 var dockerUri = builder.Configuration["Docker:Uri"] ?? "unix:///var/run/docker.sock";
 
 builder.Services.AddSingleton<DockerClient>(_ =>
@@ -84,17 +84,22 @@ builder.Services.AddSingleton<DockerClient>(_ =>
 
 builder.Services.AddScoped<IDockerService, DockerService>();
 
-//System Metrics Service
+// ── Métricas del sistema ──────────────────────────────────────────────────────
 builder.Services.AddScoped<ISystemMetricsService, SystemMetricsService>();
 
-//Plugin system
+// ── Plugin system ─────────────────────────────────────────────────────────────
 builder.Services.AddHttpClient<HttpHealthCheckMonitor>();
 builder.Services.AddScoped<IServiceMonitor, HttpHealthCheckMonitor>();
 builder.Services.AddScoped<IServiceMonitor, DockerContainerMonitor>();
 builder.Services.AddScoped<ServiceMonitorFactory>();
 
-//Build and run the app
+// ── Servicios (config externa) ────────────────────────────────────────────────
+builder.Services.AddScoped<IServicesService, ServicesService>();
+
+// ── Build ─────────────────────────────────────────────────────────────────────
 var app = builder.Build();
+
+// ── Inicialización de DB y seed del admin ─────────────────────────────────────
 using (var scope = app.Services.CreateScope())
 {
     var dbInitializer = scope.ServiceProvider.GetRequiredService<DbInitializer>();
