@@ -427,3 +427,10 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# HomeCore API
+**/secrets.json
+config/services.json
+*.db
+*.db-shm
+*.db-wal
